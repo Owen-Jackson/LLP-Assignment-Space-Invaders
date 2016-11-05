@@ -143,7 +143,7 @@ void InvadersGame::drawFrame()
 */
 void InvadersGame::input(int key, int action) const
 {
-	if (action == ASGE::KEYS::KEY_PRESS)
+	if (action == ASGE::KEYS::KEY_PRESSED)
 	{
 		if (key == ASGE::KEYS::KEY_ESCAPE)
 		{
