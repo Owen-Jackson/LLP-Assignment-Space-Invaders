@@ -3,6 +3,9 @@
 #include "Constants.h"
 #include "GameFont.h"
 
+#include <vector>
+#include <memory>
+
 #include <Engine/Input.h>
 #include <Engine/Keys.h>
 #include <Engine/Sprite.h>
@@ -47,6 +50,7 @@ bool InvadersGame::init()
 	toggleFPS();
 
 	// input callback function
+	state_callback_id = this->inputs->addCallbackFnc(&InvadersGame::processStates, this);
 	callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
 	
 	// load fonts we need
@@ -62,11 +66,13 @@ bool InvadersGame::init()
 	sprite = renderer->createSprite();
 	sprite->position[0] = 700;
 	sprite->position[1] = 250;
-
+	
 	if (!sprite->loadTexture("..\\..\\Resources\\Textures\\Invader.jpg"))
 	{
 		return false;
 	}
+
+	initMainMenu();
 
 	return true;
 }
@@ -83,8 +89,27 @@ bool InvadersGame::run()
 {
 	while (!shouldExit())
 	{
-		processGameActions();
-		render();
+		if (game_state == GameState::SPLASH_SCREEN)
+		{
+			render();
+		}
+		else if (game_state == GameState::MAIN_MENU)
+		{
+			updateMainMenu();
+			processGameActions();
+		}
+		else if (game_state == GameState::PLAYING)
+		{
+			updatePlaying();
+		}
+		else if (game_state == GameState::PAUSED)
+		{
+			updatePauseScreen();
+		}
+		else if (game_state == GameState::GAME_OVER)
+		{
+			updateGameOver();
+		}
 	}
 
 	return true;
@@ -131,6 +156,44 @@ void InvadersGame::drawFrame()
 	sprite->render(renderer);
 }
 
+void InvadersGame::initMainMenu()
+{
+	menu_arrow = renderer->createSprite();
+	menu_arrow->position[0] = 320;
+	menu_arrow->position[1] = 330;
+	menu_arrow->scale = 0.1;
+	if (!menu_arrow->loadTexture("..\\..\\Resources\\Textures\\Alien Large.png"))
+	{
+		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
+	}
+	menu_arrow->render(renderer);
+}
+
+void InvadersGame::updateMainMenu()
+{
+	beginFrame();
+	renderer->renderText("New Game", 375, 325, ASGE::COLOURS::FORESTGREEN);
+	renderer->renderText("High Scores", 375, 375, ASGE::COLOURS::FORESTGREEN);
+	renderer->renderText("Exit", 375, 425, ASGE::COLOURS::FORESTGREEN);
+	menu_arrow->render(renderer);
+
+	endFrame();
+}
+
+void InvadersGame::updatePlaying()
+{
+	;
+}
+
+void InvadersGame::updatePauseScreen()
+{
+	;
+}
+
+void InvadersGame::updateGameOver()
+{
+	;
+}
 
 /**
 *   @brief   Processes any key inputs and translates them to a GameAction
@@ -149,9 +212,24 @@ void InvadersGame::input(int key, int action) const
 		{
 			game_action = GameAction::EXIT;
 		}
+		if (key == ASGE::KEYS::KEY_W || key == ASGE::KEYS::KEY_UP)
+		{
+			game_action = GameAction::UP;
+		}
+		if (key == ASGE::KEYS::KEY_A || key == ASGE::KEYS::KEY_LEFT)
+		{
+			game_action = GameAction::LEFT;
+		}
+		if (key == ASGE::KEYS::KEY_S || key == ASGE::KEYS::KEY_DOWN)
+		{
+			game_action = GameAction::DOWN;
+		}
+		if (key == ASGE::KEYS::KEY_D || key == ASGE::KEYS::KEY_RIGHT)
+		{
+			game_action = GameAction::RIGHT;
+		}
 	}
 }
-
 
 /**
 *   @brief   Processes the next game action
@@ -166,6 +244,38 @@ void InvadersGame::processGameActions()
 	{
 		this->exit = true;
 	}
-
+	else if (game_action == GameAction::DOWN)
+	{
+		menu_arrow->position[1] += 50;
+	}
+	else if (game_action == GameAction::UP)
+	{
+		menu_arrow->position[1] -= 50;
+	}
 	game_action = GameAction::NONE;
+}
+
+void InvadersGame::processStates(int key, int action)
+{
+	if (action == ASGE::KEYS::KEY_PRESSED && game_state == GameState::SPLASH_SCREEN)
+	{
+		game_state = GameState::MAIN_MENU;
+		callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
+	}
+	if (action == ASGE::KEYS::KEY_S && game_state == GameState::MAIN_MENU)
+	{
+		switch (menu_state)
+		{
+		case  MenuState::PLAY:
+			menu_state = MenuState::HIGHSCORES;
+			break;
+		case  MenuState::HIGHSCORES:
+			menu_state = MenuState::QUIT;
+			break;
+		case  MenuState::QUIT:
+			menu_state = MenuState::PLAY;
+			break;
+		}
+		callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
+	}
 }

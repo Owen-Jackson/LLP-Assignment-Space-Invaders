@@ -65,5 +65,9 @@ namespace ASGE {
 		constexpr int KEY_TAB = 258;
 		constexpr int KEY_BACKSPACE = 259;
 		constexpr int KEY_DELETE = 261;
+		constexpr int KEY_RIGHT = 262;
+		constexpr int KEY_LEFT = 263;
+		constexpr int KEY_DOWN = 264;
+		constexpr int KEY_UP = 265;
 	}
 }

@@ -16,6 +16,11 @@ enum class GameAction
 {
 	INVALID = -1,  /**< is a non-valid game action */
 	NONE    =  0,  /**< means no outstanding action to process */
+	LEFT,		   /**< signals to move the player left */
+	RIGHT,		   /**< signals to move the player right */
+	UP,			   /**< used to navigate up in the menu */
+	DOWN,		   /**< used to navigate down in the menu */
+	SHOOT,		   /**< signals the intention to shoot */
 	EXIT           /**< signals the intention to exit the game */
 };
 
