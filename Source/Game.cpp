@@ -2,6 +2,8 @@
 #include "Actions.h"
 #include "Constants.h"
 #include "GameFont.h"
+#include "MainMenu.h"
+#include "Player.h"
 
 #include <vector>
 #include <memory>
@@ -26,6 +28,7 @@ InvadersGame::InvadersGame()
 InvadersGame::~InvadersGame()
 {
 	this->inputs->unregisterCallback(callback_id);
+	this->inputs->unregisterCallback(state_callback_id);
 }
 
 
@@ -72,6 +75,19 @@ bool InvadersGame::init()
 		return false;
 	}
 
+	//Create main menu
+	menu = std::make_unique<MainMenu>();
+
+	//Create player
+	player_one = std::make_unique<Player>();
+	player_one->loadSprite(renderer);
+	player_one->getSprite()->position[0] = 310;
+	player_one->getSprite()->position[1] = 280;
+	if (!player_one->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Player.jpg"))
+	{
+		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
+	}
+
 	initMainMenu();
 
 	return true;
@@ -95,8 +111,8 @@ bool InvadersGame::run()
 		}
 		else if (game_state == GameState::MAIN_MENU)
 		{
-			updateMainMenu();
 			processGameActions();
+			updateMainMenu();
 		}
 		else if (game_state == GameState::PLAYING)
 		{
@@ -156,18 +172,20 @@ void InvadersGame::drawFrame()
 	sprite->render(renderer);
 }
 
+
 void InvadersGame::initMainMenu()
 {
-	menu_arrow = renderer->createSprite();
-	menu_arrow->position[0] = 320;
-	menu_arrow->position[1] = 330;
-	menu_arrow->scale = 0.1;
-	if (!menu_arrow->loadTexture("..\\..\\Resources\\Textures\\Alien Large.png"))
+	menu->selection_arrow = renderer->createSprite();
+	menu->selection_arrow->position[0] = 310;
+	menu->selection_arrow->position[1] = 280;
+	menu->selection_arrow->scale = 0.1;
+	if (!menu->selection_arrow->loadTexture("..\\..\\Resources\\Textures\\Alien Large.png"))
 	{
 		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 	}
-	menu_arrow->render(renderer);
+	menu->selection_arrow->render(renderer);
 }
+
 
 void InvadersGame::updateMainMenu()
 {
@@ -175,14 +193,15 @@ void InvadersGame::updateMainMenu()
 	renderer->renderText("New Game", 375, 325, ASGE::COLOURS::FORESTGREEN);
 	renderer->renderText("High Scores", 375, 375, ASGE::COLOURS::FORESTGREEN);
 	renderer->renderText("Exit", 375, 425, ASGE::COLOURS::FORESTGREEN);
-	menu_arrow->render(renderer);
-
+	menu->selection_arrow->render(renderer);
 	endFrame();
 }
 
 void InvadersGame::updatePlaying()
 {
-	;
+	beginFrame();
+	player_one->getSprite()->render(renderer);
+	endFrame();
 }
 
 void InvadersGame::updatePauseScreen()
@@ -228,6 +247,10 @@ void InvadersGame::input(int key, int action) const
 		{
 			game_action = GameAction::RIGHT;
 		}
+		if (key == ASGE::KEYS::KEY_ENTER || key == ASGE::KEYS::KEY_SPACE)
+		{
+			game_action = GameAction::SELECT;
+		}
 	}
 }
 
@@ -246,11 +269,15 @@ void InvadersGame::processGameActions()
 	}
 	else if (game_action == GameAction::DOWN)
 	{
-		menu_arrow->position[1] += 50;
+		menu->processMenuStates(game_action);
 	}
 	else if (game_action == GameAction::UP)
 	{
-		menu_arrow->position[1] -= 50;
+		menu->processMenuStates(game_action);
+	}
+	else if (game_action == GameAction::SELECT)
+	{
+		this->inputs->addCallbackFnc(&InvadersGame::processStates, this);
 	}
 	game_action = GameAction::NONE;
 }
@@ -262,20 +289,22 @@ void InvadersGame::processStates(int key, int action)
 		game_state = GameState::MAIN_MENU;
 		callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
 	}
-	if (action == ASGE::KEYS::KEY_S && game_state == GameState::MAIN_MENU)
+	if (game_state == GameState::MAIN_MENU && game_action == GameAction::SELECT)
 	{
-		switch (menu_state)
+		switch (menu->menu_state)
 		{
-		case  MenuState::PLAY:
-			menu_state = MenuState::HIGHSCORES;
+		case MainMenu::MenuState::PLAY:
+			game_state = GameState::PLAYING;
 			break;
-		case  MenuState::HIGHSCORES:
-			menu_state = MenuState::QUIT;
+		case MainMenu::MenuState::HIGHSCORES:
+			game_state = GameState::LEADERBOARD;
 			break;
-		case  MenuState::QUIT:
-			menu_state = MenuState::PLAY;
+		case MainMenu::MenuState::QUIT:
+			this->exit = true;
 			break;
+		default:
+			renderer->renderText("NOT WORKING", 50, 50, ASGE::COLOURS::WHITE);
 		}
-		callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
+		//callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
 	}
 }

@@ -21,6 +21,7 @@ enum class GameAction
 	UP,			   /**< used to navigate up in the menu */
 	DOWN,		   /**< used to navigate down in the menu */
 	SHOOT,		   /**< signals the intention to shoot */
+	SELECT,		   /**< used when choosing options from the menus */
 	EXIT           /**< signals the intention to exit the game */
 };
 
