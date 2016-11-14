@@ -1,6 +1,8 @@
 #pragma once
 #include <Engine/Sprite.h>
 
+enum class GameAction;
+
 namespace ASGE
 {
 	class Renderer;
@@ -26,8 +28,6 @@ public:
 
 protected:
 	std::unique_ptr<ASGE::Sprite> actor_sprite = nullptr;
-	int x_pos = 0;
-	int y_pos = 0;
-	float move_speed;
+	float move_speed = 1;
 	bool alive = true;
 };

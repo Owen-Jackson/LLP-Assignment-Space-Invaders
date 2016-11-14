@@ -6,30 +6,27 @@
 //Accessors
 int GameActor::getXPosition() const
 {
-	return x_pos;
+	return actor_sprite->position[0];
 }
 
 int GameActor::getYPosition() const
 {
-	return y_pos;
+	return actor_sprite->position[1];
 }
 
 void GameActor::setXPosition(int new_x)
 {
-	x_pos = new_x;
+	actor_sprite->position[0] = new_x;
 }
 
 void GameActor::setYPosition(int new_y)
 {
-	y_pos = new_y;
+	actor_sprite->position[1] = new_y;
 }
 
 void GameActor::loadSprite(std::shared_ptr<ASGE::Renderer> renderer)
 {
 	actor_sprite = renderer->createSprite();
-	//actor_sprite->loadTexture("Resources\\Textures\\avatar");
-	//actor_sprite->size[0] = 92;
-	//actor_sprite->size[1] = 92;
 }
 
 ASGE::Sprite* GameActor::getSprite()

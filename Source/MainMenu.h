@@ -20,6 +20,7 @@ public:
 
 	void changeSelection(int new_position);
 	void processMenuStates(GameAction action);
+	ASGE::Sprite* getSprite();
 
 private:
 	std::unique_ptr<ASGE::Sprite> selection_arrow;

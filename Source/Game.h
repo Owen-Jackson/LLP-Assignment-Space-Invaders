@@ -17,7 +17,6 @@ class InvadersGame:
 {
 	enum class GameState
 	{
-		SPLASH_SCREEN,
 		MAIN_MENU,
 		PLAYING,
 		LEADERBOARD,
@@ -51,7 +50,7 @@ private:
 	void processStates(int key, int action);
 	void input(int key, int action) const;
 
-	GameState game_state = GameState::SPLASH_SCREEN;
+	GameState game_state = GameState::MAIN_MENU;
 
 	int  callback_id = -1;                             /**< Input Callback ID. The callback ID assigned by the game engine. */
 	int state_callback_id = -1;

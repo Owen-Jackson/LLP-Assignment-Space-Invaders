@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "GameFont.h"
 #include "MainMenu.h"
+#include "GameActor.h"
 #include "Player.h"
 
 #include <vector>
@@ -83,7 +84,7 @@ bool InvadersGame::init()
 	player_one->loadSprite(renderer);
 	player_one->getSprite()->position[0] = 310;
 	player_one->getSprite()->position[1] = 280;
-	if (!player_one->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Player.jpg"))
+	if (!player_one->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Player.png"))
 	{
 		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 	}
@@ -105,18 +106,15 @@ bool InvadersGame::run()
 {
 	while (!shouldExit())
 	{
-		if (game_state == GameState::SPLASH_SCREEN)
+		if (game_state == GameState::MAIN_MENU)
 		{
-			render();
-		}
-		else if (game_state == GameState::MAIN_MENU)
-		{
-			processGameActions();
 			updateMainMenu();
+			processGameActions();
 		}
 		else if (game_state == GameState::PLAYING)
 		{
 			updatePlaying();
+			processGameActions();
 		}
 		else if (game_state == GameState::PAUSED)
 		{
@@ -176,23 +174,22 @@ void InvadersGame::drawFrame()
 void InvadersGame::initMainMenu()
 {
 	menu->selection_arrow = renderer->createSprite();
-	menu->selection_arrow->position[0] = 310;
-	menu->selection_arrow->position[1] = 280;
-	menu->selection_arrow->scale = 0.1;
-	if (!menu->selection_arrow->loadTexture("..\\..\\Resources\\Textures\\Alien Large.png"))
+	menu->selection_arrow->position[0] = 330;
+	menu->selection_arrow->position[1] = 300;
+	menu->selection_arrow->scale = 0.3;
+	if (!menu->selection_arrow->loadTexture("..\\..\\Resources\\Textures\\Large Alien 1.png"))
 	{
 		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 	}
 	menu->selection_arrow->render(renderer);
 }
 
-
 void InvadersGame::updateMainMenu()
 {
 	beginFrame();
 	renderer->renderText("New Game", 375, 325, ASGE::COLOURS::FORESTGREEN);
 	renderer->renderText("High Scores", 375, 375, ASGE::COLOURS::FORESTGREEN);
-	renderer->renderText("Exit", 375, 425, ASGE::COLOURS::FORESTGREEN);
+	renderer->renderText("Exit", 375, 425, ASGE::COLOURS::FORESTGREEN);	
 	menu->selection_arrow->render(renderer);
 	endFrame();
 }
@@ -275,36 +272,52 @@ void InvadersGame::processGameActions()
 	{
 		menu->processMenuStates(game_action);
 	}
-	else if (game_action == GameAction::SELECT)
-	{
-		this->inputs->addCallbackFnc(&InvadersGame::processStates, this);
-	}
+	this->inputs->addCallbackFnc(&InvadersGame::processStates, this);
 	game_action = GameAction::NONE;
 }
 
 void InvadersGame::processStates(int key, int action)
 {
-	if (action == ASGE::KEYS::KEY_PRESSED && game_state == GameState::SPLASH_SCREEN)
+	switch (game_state)
 	{
-		game_state = GameState::MAIN_MENU;
-		callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
-	}
-	if (game_state == GameState::MAIN_MENU && game_action == GameAction::SELECT)
-	{
-		switch (menu->menu_state)
+	case GameState::MAIN_MENU:
+		if (game_action == GameAction::SELECT)
 		{
-		case MainMenu::MenuState::PLAY:
-			game_state = GameState::PLAYING;
-			break;
-		case MainMenu::MenuState::HIGHSCORES:
-			game_state = GameState::LEADERBOARD;
-			break;
-		case MainMenu::MenuState::QUIT:
-			this->exit = true;
-			break;
-		default:
-			renderer->renderText("NOT WORKING", 50, 50, ASGE::COLOURS::WHITE);
+			switch (menu->menu_state)
+			{
+			case MainMenu::MenuState::PLAY:
+				game_state = GameState::PLAYING;
+				break;
+			case MainMenu::MenuState::HIGHSCORES:
+				game_state = GameState::LEADERBOARD;
+				break;
+			case MainMenu::MenuState::QUIT:
+				this->exit = true;
+				break;
+			default:
+				renderer->renderText("NOT WORKING", 50, 50, ASGE::COLOURS::WHITE);
+			}
 		}
-		//callback_id = this->inputs->addCallbackFnc(&InvadersGame::input, this);
+		break;
+	case GameState::PLAYING:
+		switch (game_action)
+		{
+		case GameAction::LEFT:
+			player_one->setMoveState(Player::Movement::LEFT);
+			player_one->move();
+			break;
+		case GameAction::RIGHT:
+			player_one->setMoveState(Player::Movement::RIGHT);
+			player_one->move();
+			break;
+		case GameAction::NONE:
+			player_one->setMoveState(Player::Movement::NONE);
+			break;
+		case GameAction::SHOOT:
+			player_one->attack();
+			break;
+		}
+
 	}
+
 }

@@ -47,3 +47,8 @@ void MainMenu::processMenuStates(GameAction action)
 	}
 	game_action = GameAction::NONE;
 }
+
+ASGE::Sprite* MainMenu::getSprite()
+{
+	return selection_arrow.get();
+}
