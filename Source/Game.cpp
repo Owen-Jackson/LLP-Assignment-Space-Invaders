@@ -5,6 +5,9 @@
 #include "MainMenu.h"
 #include "GameActor.h"
 #include "Player.h"
+#include "Alien.h"
+#include "StandardAlien.h"
+#include "BonusAlien.h"
 
 #include <vector>
 #include <memory>
@@ -82,13 +85,58 @@ bool InvadersGame::init()
 	//Create player
 	player_one = std::make_unique<Player>();
 	player_one->loadSprite(renderer);
-	player_one->getSprite()->position[0] = 310;
-	player_one->getSprite()->position[1] = 280;
+	player_one->getSprite()->scale = 0.5;
+	player_one->getSprite()->position[0] = 640;
+	player_one->getSprite()->position[1] = 600;
 	if (!player_one->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Player.png"))
 	{
 		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 	}
 
+	//Create Aliens
+	aliens.reserve(55);
+	int column_count = 0;
+	int row_count = 0;
+	for (int i = 0; i < aliens.capacity(); i++)
+	{
+		aliens.push_back(std::move(std::make_unique<StandardAlien>()));
+		aliens[i]->loadSprite(renderer);
+		aliens[i]->getSprite()->position[0] = column_count * 50 + 200;
+		aliens[i]->getSprite()->position[1] = row_count * 50 + 200;
+		aliens[i]->getSprite()->scale = 0.3;
+		if (i > 32)
+		{
+			if (!aliens[i]->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Large Alien 1.png"))
+			{
+				renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
+			}			
+			else
+			{
+				renderer->renderText("loaded large alien", 400, 400, ASGE::COLOURS::WHITE);
+			}
+		}
+		else if (i > 10)
+		{
+			if (!aliens[i]->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Standard Alien 1.png"));
+			{
+				renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
+			}
+		}
+		else
+		{
+			if (!aliens[i]->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Small Alien 1.png"));
+			{
+				renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
+			}
+		}
+		column_count++;
+		if (column_count % 11 == 0)
+		{
+			column_count = 0;
+			row_count++;
+		}
+	}
+	
 	initMainMenu();
 
 	return true;
@@ -197,7 +245,33 @@ void InvadersGame::updateMainMenu()
 void InvadersGame::updatePlaying()
 {
 	beginFrame();
+	player_one->move();
 	player_one->getSprite()->render(renderer);
+	for (const auto& alien : aliens)
+	{
+		int wall_collisions = 0;
+		for (const auto& alien : aliens)
+		{
+			if (alien->hitScreenEdge())
+			{
+				wall_collisions++;
+			}
+		}
+		if (wall_collisions > 0)
+		{
+			renderer->renderText("wall hit", 100, 100, ASGE::COLOURS::WHITE);
+			if (alien->getMoveState() == StandardAlien::Movement::LEFT)
+			{
+				alien->setMoveState(StandardAlien::Movement::RIGHT);
+			}
+			else
+			{
+				alien->setMoveState(StandardAlien::Movement::LEFT);
+			}
+		}
+		alien->move();
+		alien->getSprite()->render(renderer);
+	}
 	endFrame();
 }
 
@@ -247,6 +321,17 @@ void InvadersGame::input(int key, int action) const
 		if (key == ASGE::KEYS::KEY_ENTER || key == ASGE::KEYS::KEY_SPACE)
 		{
 			game_action = GameAction::SELECT;
+		}
+	}
+	if (action == ASGE::KEYS::KEY_REPEATED)
+	{
+		if (key == ASGE::KEYS::KEY_A || key == ASGE::KEYS::KEY_LEFT)
+		{
+			game_action = GameAction::LEFT;
+		}
+		if (key == ASGE::KEYS::KEY_D || key == ASGE::KEYS::KEY_RIGHT)
+		{
+			game_action = GameAction::RIGHT;
 		}
 	}
 }
@@ -304,11 +389,9 @@ void InvadersGame::processStates(int key, int action)
 		{
 		case GameAction::LEFT:
 			player_one->setMoveState(Player::Movement::LEFT);
-			player_one->move();
 			break;
 		case GameAction::RIGHT:
 			player_one->setMoveState(Player::Movement::RIGHT);
-			player_one->move();
 			break;
 		case GameAction::NONE:
 			player_one->setMoveState(Player::Movement::NONE);
@@ -317,7 +400,10 @@ void InvadersGame::processStates(int key, int action)
 			player_one->attack();
 			break;
 		}
-
 	}
+}
 
+void InvadersGame::addAlien(std::unique_ptr<StandardAlien>&& obj)
+{
+	aliens.push_back(std::move(obj));
 }

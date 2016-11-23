@@ -7,6 +7,7 @@
 struct GameFont;
 class MainMenu;
 class Player;
+class StandardAlien;
 
 /**
 *  Invaders Game. An OpenGL Game based on ASGE.
@@ -45,6 +46,9 @@ public:
 	void updatePauseScreen();
 	void updateGameOver();
 
+	//Add aliens to vector
+	void addAlien(std::unique_ptr<StandardAlien>&&);
+
 private:
 	void processGameActions(); 
 	void processStates(int key, int action);
@@ -58,5 +62,6 @@ private:
 	std::unique_ptr<ASGE::Sprite> sprite = nullptr;    /**< Sprite Object. The space invader sprite. */
 	std::unique_ptr<MainMenu> menu = nullptr;
 	std::unique_ptr<Player> player_one = nullptr;
+	std::vector<std::unique_ptr<StandardAlien>> aliens;
 };
 

@@ -1,13 +1,8 @@
 #include "Player.h"
 
-Player::Movement Player::getMoveState()
+Player::Player()
 {
-	return move_state;
-}
-
-void Player::setMoveState(Movement new_state)
-{
-	move_state = new_state;
+	move_speed = 2;
 }
 
 void Player::move()

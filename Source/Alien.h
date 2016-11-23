@@ -9,8 +9,10 @@ public:
 
 	void attack();
 	int getScoreToAdd();
-	void setScoreToAdd();
-	virtual void move() override;
+	void setScoreToAdd(int score);
+	virtual void move() = 0;
+
 protected:
-	int points_worth;
+	int points_worth = 100;
+	bool canAttack = true;
 };
