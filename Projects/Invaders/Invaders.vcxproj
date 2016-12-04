@@ -92,22 +92,29 @@
   <ItemGroup>
     <ClCompile Include="..\..\Source\Actions.cpp" />
     <ClCompile Include="..\..\Source\Alien.cpp" />
+    <ClCompile Include="..\..\Source\AlienManager.cpp" />
     <ClCompile Include="..\..\Source\BonusAlien.cpp" />
     <ClCompile Include="..\..\Source\GameActor.cpp" />
     <ClCompile Include="..\..\Source\GameFont.cpp" />
+    <ClCompile Include="..\..\Source\LaserManager.cpp" />
     <ClCompile Include="..\..\Source\main.cpp" />
     <ClCompile Include="..\..\Source\MainMenu.cpp" />
     <ClCompile Include="..\..\Source\Player.cpp" />
+    <ClCompile Include="..\..\Source\Laser.cpp" />
     <ClCompile Include="..\..\Source\StandardAlien.cpp" />
     <ClInclude Include="..\..\Source\Actions.h" />
     <ClInclude Include="..\..\Source\Alien.h" />
+    <ClInclude Include="..\..\Source\AlienManager.h" />
     <ClInclude Include="..\..\Source\BonusAlien.h" />
     <ClInclude Include="..\..\Source\Constants.h" />
     <ClInclude Include="..\..\Source\Game.h" />
     <ClInclude Include="..\..\Source\GameActor.h" />
+    <ClInclude Include="..\..\Source\GameData.h" />
     <ClInclude Include="..\..\Source\GameFont.h" />
+    <ClInclude Include="..\..\Source\LaserManager.h" />
     <ClInclude Include="..\..\Source\MainMenu.h" />
     <ClInclude Include="..\..\Source\Player.h" />
+    <ClInclude Include="..\..\Source\Laser.h" />
     <ClInclude Include="..\..\Source\StandardAlien.h" />
   </ItemGroup>
   <ItemGroup>

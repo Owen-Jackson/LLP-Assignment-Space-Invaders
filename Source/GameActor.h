@@ -1,5 +1,7 @@
 #pragma once
 #include <Engine/Sprite.h>
+#include "GameData.h"
+#include "Constants.h"
 
 enum class GameAction;
 
@@ -12,28 +14,35 @@ namespace ASGE
 class GameActor
 {
 public:
-	enum class Movement
+	enum Movement
 	{
 		NONE,
 		LEFT,
-		RIGHT
+		RIGHT,
+		DOWN
 	};
 
-	GameActor() = default;
+	GameActor(GameData* _GD);
 	virtual ~GameActor() = default;
 
 	//Accessors
 	void loadSprite(std::shared_ptr<ASGE::Renderer> renderer);
 	ASGE::Sprite* getSprite();
 	Movement getMoveState();
-	void setMoveState(Movement setting);
+	Movement getPreviousMoveState();
+	bool getIsAlive();
+	void setMoveState(Movement new_state);
+	void setPreviousMoveState(Movement last_state);
+	void setIsAlive(bool setting);
 
-	virtual void attack() = 0;
 	virtual void move() = 0;
+	virtual bool checkCollisions() = 0;
 
 protected:
 	std::unique_ptr<ASGE::Sprite> actor_sprite = nullptr;
 	float move_speed = 1;
 	bool alive = true;
-	Movement move_state = Movement::NONE;
+	Movement previous_move_state = NONE;
+	Movement move_state = NONE;
+	GameData* game_data = nullptr;
 };

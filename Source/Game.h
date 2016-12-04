@@ -5,9 +5,12 @@
 #include <memory>
 
 struct GameFont;
+struct GameData;
 class MainMenu;
 class Player;
 class StandardAlien;
+class AlienManager;
+class LaserManager;
 
 /**
 *  Invaders Game. An OpenGL Game based on ASGE.
@@ -16,15 +19,6 @@ class StandardAlien;
 class InvadersGame:
 	public ASGE::OGLGame
 {
-	enum class GameState
-	{
-		MAIN_MENU,
-		PLAYING,
-		LEADERBOARD,
-		PAUSED,
-		GAME_OVER,
-		EXIT
-	};
 
 public:
 	InvadersGame();
@@ -46,15 +40,13 @@ public:
 	void updatePauseScreen();
 	void updateGameOver();
 
-	//Add aliens to vector
-	void addAlien(std::unique_ptr<StandardAlien>&&);
-
 private:
 	void processGameActions(); 
 	void processStates(int key, int action);
 	void input(int key, int action) const;
 
-	GameState game_state = GameState::MAIN_MENU;
+	float frame_count = 0;
+	float count_limit = 40;
 
 	int  callback_id = -1;                             /**< Input Callback ID. The callback ID assigned by the game engine. */
 	int state_callback_id = -1;
@@ -62,6 +54,8 @@ private:
 	std::unique_ptr<ASGE::Sprite> sprite = nullptr;    /**< Sprite Object. The space invader sprite. */
 	std::unique_ptr<MainMenu> menu = nullptr;
 	std::unique_ptr<Player> player_one = nullptr;
-	std::vector<std::unique_ptr<StandardAlien>> aliens;
+	std::unique_ptr<GameData> game_data = nullptr;
+	std::unique_ptr<AlienManager> alien_manager = nullptr;
+	std::unique_ptr<LaserManager> laser_manager = nullptr;
 };
 

@@ -1,8 +1,8 @@
 #include "Alien.h"
 
-void Alien::attack()
+Alien::Alien(GameData* _GD) : GameActor::GameActor(_GD)
 {
-
+	game_data = _GD;
 }
 
 int Alien::getScoreToAdd()

@@ -4,8 +4,9 @@
 class BonusAlien : public Alien
 {
 public:
-	BonusAlien();
+	BonusAlien(GameData* _GD);
 	~BonusAlien() = default;
 
-	virtual void move() override;
+	void move() override;
+	bool checkCollisions() override;
 };

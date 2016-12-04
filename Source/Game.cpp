@@ -3,11 +3,13 @@
 #include "Constants.h"
 #include "GameFont.h"
 #include "MainMenu.h"
-#include "GameActor.h"
 #include "Player.h"
-#include "Alien.h"
+#include "GameActor.h"
 #include "StandardAlien.h"
 #include "BonusAlien.h"
+#include "GameData.h"
+#include "AlienManager.h"
+#include "LaserManager.h"
 
 #include <vector>
 #include <memory>
@@ -69,6 +71,14 @@ bool InvadersGame::init()
 		return false;
 	}
 
+	//Initialise game data
+	game_data = std::make_unique<GameData>();
+	game_data->renderer = renderer;
+
+	//Initialise managers
+	alien_manager = std::make_unique<AlienManager>(game_data.get());
+	laser_manager = std::make_unique<LaserManager>(game_data.get());
+
 	// load space invader sprite
 	sprite = renderer->createSprite();
 	sprite->position[0] = 700;
@@ -83,7 +93,7 @@ bool InvadersGame::init()
 	menu = std::make_unique<MainMenu>();
 
 	//Create player
-	player_one = std::make_unique<Player>();
+	player_one = std::make_unique<Player>(game_data.get());
 	player_one->loadSprite(renderer);
 	player_one->getSprite()->scale = 0.5;
 	player_one->getSprite()->position[0] = 640;
@@ -93,55 +103,10 @@ bool InvadersGame::init()
 		renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 	}
 
-	//Create Aliens
-	aliens.reserve(55);
-	int column_count = 0;
-	int row_count = 0;
-	for (int i = 0; i < aliens.capacity(); i++)
-	{
-		aliens.push_back(std::move(std::make_unique<StandardAlien>()));
-		aliens[i]->loadSprite(renderer);
-		aliens[i]->getSprite()->position[0] = column_count * 50 + 200;
-		aliens[i]->getSprite()->position[1] = row_count * 50 + 200;
-		aliens[i]->getSprite()->scale = 0.3;
-		if (i > 32)
-		{
-			if (!aliens[i]->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Large Alien 1.png"))
-			{
-				renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
-			}			
-			else
-			{
-				renderer->renderText("loaded large alien", 400, 400, ASGE::COLOURS::WHITE);
-			}
-		}
-		else if (i > 10)
-		{
-			if (!aliens[i]->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Standard Alien 1.png"));
-			{
-				renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
-			}
-		}
-		else
-		{
-			if (!aliens[i]->getSprite()->loadTexture("..\\..\\Resources\\Textures\\Small Alien 1.png"));
-			{
-				renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
-			}
-		}
-		column_count++;
-		if (column_count % 11 == 0)
-		{
-			column_count = 0;
-			row_count++;
-		}
-	}
-	
 	initMainMenu();
 
 	return true;
 }
-
 
 /**
 *   @brief   The main game loop. 
@@ -154,21 +119,21 @@ bool InvadersGame::run()
 {
 	while (!shouldExit())
 	{
-		if (game_state == GameState::MAIN_MENU)
+		if (game_data->game_state == GameData::GameState::MAIN_MENU)
 		{
 			updateMainMenu();
 			processGameActions();
 		}
-		else if (game_state == GameState::PLAYING)
+		else if (game_data->game_state == GameData::GameState::PLAYING)
 		{
 			updatePlaying();
 			processGameActions();
 		}
-		else if (game_state == GameState::PAUSED)
+		else if (game_data->game_state == GameData::GameState::PAUSED)
 		{
 			updatePauseScreen();
 		}
-		else if (game_state == GameState::GAME_OVER)
+		else if (game_data->game_state == GameData::GameState::GAME_OVER)
 		{
 			updateGameOver();
 		}
@@ -176,7 +141,6 @@ bool InvadersGame::run()
 
 	return true;
 }
-
 
 /**
 *   @brief   Should the game exit?
@@ -187,7 +151,6 @@ bool InvadersGame::shouldExit() const
 {
 	return (renderer->exit() || this->exit);
 }
-
 
 /**
 *   @brief   Renders the scene
@@ -203,7 +166,6 @@ void InvadersGame::render()
 	endFrame();
 }
 
-
 /**
 *   @brief   Renderers the contents for this frame 
 *   @details All game objects that need rendering should be done
@@ -217,7 +179,6 @@ void InvadersGame::drawFrame()
 	renderer->renderText("Space Invaders\nSTART", 375, 325, 1.0, ASGE::COLOURS::DARKORANGE);
 	sprite->render(renderer);
 }
-
 
 void InvadersGame::initMainMenu()
 {
@@ -247,31 +208,15 @@ void InvadersGame::updatePlaying()
 	beginFrame();
 	player_one->move();
 	player_one->getSprite()->render(renderer);
-	for (const auto& alien : aliens)
+	
+	game_data->frame_count++;
+	if (game_data->frame_count == game_data->max_count)
 	{
-		int wall_collisions = 0;
-		for (const auto& alien : aliens)
-		{
-			if (alien->hitScreenEdge())
-			{
-				wall_collisions++;
-			}
-		}
-		if (wall_collisions > 0)
-		{
-			renderer->renderText("wall hit", 100, 100, ASGE::COLOURS::WHITE);
-			if (alien->getMoveState() == StandardAlien::Movement::LEFT)
-			{
-				alien->setMoveState(StandardAlien::Movement::RIGHT);
-			}
-			else
-			{
-				alien->setMoveState(StandardAlien::Movement::LEFT);
-			}
-		}
-		alien->move();
-		alien->getSprite()->render(renderer);
+		alien_manager->tick();
+		game_data->frame_count = 0;
 	}
+	alien_manager->render();
+	laser_manager->tick();
 	endFrame();
 }
 
@@ -318,20 +263,13 @@ void InvadersGame::input(int key, int action) const
 		{
 			game_action = GameAction::RIGHT;
 		}
-		if (key == ASGE::KEYS::KEY_ENTER || key == ASGE::KEYS::KEY_SPACE)
+		if (key == ASGE::KEYS::KEY_ENTER)
 		{
 			game_action = GameAction::SELECT;
 		}
-	}
-	if (action == ASGE::KEYS::KEY_REPEATED)
-	{
-		if (key == ASGE::KEYS::KEY_A || key == ASGE::KEYS::KEY_LEFT)
+		if (key == ASGE::KEYS::KEY_SPACE)
 		{
-			game_action = GameAction::LEFT;
-		}
-		if (key == ASGE::KEYS::KEY_D || key == ASGE::KEYS::KEY_RIGHT)
-		{
-			game_action = GameAction::RIGHT;
+			game_action = GameAction::SHOOT;
 		}
 	}
 }
@@ -345,36 +283,61 @@ void InvadersGame::input(int key, int action) const
 */
 void InvadersGame::processGameActions()
 {
-	if (game_action == GameAction::EXIT)
+	switch (game_action)
+	{
+	case(GameAction::EXIT) :
 	{
 		this->exit = true;
+		break;
 	}
-	else if (game_action == GameAction::DOWN)
+	case(GameAction::DOWN) :
 	{
 		menu->processMenuStates(game_action);
+		break;
 	}
-	else if (game_action == GameAction::UP)
+	case(GameAction::UP) :
 	{
 		menu->processMenuStates(game_action);
+		break;
 	}
-	this->inputs->addCallbackFnc(&InvadersGame::processStates, this);
-	game_action = GameAction::NONE;
+	case(GameAction::LEFT) :
+	{
+		player_one->setMoveState(Player::Movement::LEFT);
+		break;
+	}
+	case(GameAction::RIGHT) :
+	{
+		player_one->setMoveState(Player::Movement::RIGHT);
+		break;
+	}
+	case (GameAction::SHOOT) :
+	{
+		laser_manager->addLaser(std::make_unique<Laser>(true, player_one->getSprite()->position[0] + (player_one->getSprite()->size[0] / 4), player_one->getSprite()->position[1], game_data.get()));
+		if (game_data->player_can_shoot)
+		{
+			player_one->attack();
+		}
+		break;
+	}
+	}
+		this->inputs->addCallbackFnc(&InvadersGame::processStates, this);
+		game_action = GameAction::NONE;
 }
 
 void InvadersGame::processStates(int key, int action)
 {
-	switch (game_state)
+	switch (game_data->game_state)
 	{
-	case GameState::MAIN_MENU:
+	case GameData::GameState::MAIN_MENU:
 		if (game_action == GameAction::SELECT)
 		{
 			switch (menu->menu_state)
 			{
 			case MainMenu::MenuState::PLAY:
-				game_state = GameState::PLAYING;
+				game_data->game_state = GameData::GameState::PLAYING;
 				break;
 			case MainMenu::MenuState::HIGHSCORES:
-				game_state = GameState::LEADERBOARD;
+				game_data->game_state = GameData::GameState::LEADERBOARD;
 				break;
 			case MainMenu::MenuState::QUIT:
 				this->exit = true;
@@ -384,7 +347,8 @@ void InvadersGame::processStates(int key, int action)
 			}
 		}
 		break;
-	case GameState::PLAYING:
+		/*
+	case GameData::GameState::PLAYING:
 		switch (game_action)
 		{
 		case GameAction::LEFT:
@@ -396,14 +360,7 @@ void InvadersGame::processStates(int key, int action)
 		case GameAction::NONE:
 			player_one->setMoveState(Player::Movement::NONE);
 			break;
-		case GameAction::SHOOT:
-			player_one->attack();
-			break;
 		}
+		*/
 	}
-}
-
-void InvadersGame::addAlien(std::unique_ptr<StandardAlien>&& obj)
-{
-	aliens.push_back(std::move(obj));
 }

@@ -4,13 +4,13 @@
 class Alien : public GameActor
 {
 public:
-	Alien() = default;
-	~Alien() = default;
+	Alien(GameData* _GD);
+	virtual ~Alien() = default;
 
-	void attack();
 	int getScoreToAdd();
 	void setScoreToAdd(int score);
 	virtual void move() = 0;
+	virtual bool checkCollisions() = 0;
 
 protected:
 	int points_worth = 100;

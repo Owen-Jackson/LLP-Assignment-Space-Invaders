@@ -4,9 +4,12 @@
 class StandardAlien : public Alien
 {
 public:
-	StandardAlien();
+	StandardAlien(GameData* _GD);
 	~StandardAlien() = default;
 
-	virtual void move() override;
+	void move() override;
+	bool checkCollisions() override;
 	bool hitScreenEdge();
+	void changeDirection();
+	void attack();
 };

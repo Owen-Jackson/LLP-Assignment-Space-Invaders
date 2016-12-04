@@ -1,12 +1,16 @@
 #pragma once
 #include "GameActor.h"
+#include "Laser.h"
 
 class Player : public GameActor
 {
 public:
-	Player();
+	Player(GameData* _GD);
 	~Player() = default;
 
-	void attack() override;
+	void attack();
 	void move() override;
+	bool checkCollisions() override;
+
+private:
 };
