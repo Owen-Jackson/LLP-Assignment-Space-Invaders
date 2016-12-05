@@ -37,9 +37,6 @@
     <ClCompile Include="..\..\Source\Laser.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\LaserManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
@@ -87,9 +84,6 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Laser.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LaserManager.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

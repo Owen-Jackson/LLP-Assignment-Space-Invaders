@@ -9,7 +9,7 @@ LaserManager::LaserManager(GameData* _GD)
 
 void LaserManager::init()
 {
-	//laser_list.push_back(std::move(std::make_unique<Laser>(true, 50, 500, game_data)));
+	;
 }
 
 void LaserManager::addLaser(std::unique_ptr<Laser>&& laser)
@@ -20,10 +20,15 @@ void LaserManager::addLaser(std::unique_ptr<Laser>&& laser)
 
 void LaserManager::tick()
 {
-	for (int i = 0; i < laser_list.size(); i++)
+	for (auto& laser : laser_list)
 	{
-		laser_list[i]->tick();
+		laser->tick();
+		if (!laser->getIsAlive())
+		{
+			laser.reset();
+		}
 	}
+	number_of_bullets = laser_list.size();
 }
 
 void LaserManager::render()

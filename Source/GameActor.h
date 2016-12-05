@@ -35,6 +35,7 @@ public:
 	void setPreviousMoveState(Movement last_state);
 	void setIsAlive(bool setting);
 
+	virtual void tick() = 0;
 	virtual void move() = 0;
 	virtual bool checkCollisions() = 0;
 

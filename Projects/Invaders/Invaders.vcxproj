@@ -96,7 +96,6 @@
     <ClCompile Include="..\..\Source\BonusAlien.cpp" />
     <ClCompile Include="..\..\Source\GameActor.cpp" />
     <ClCompile Include="..\..\Source\GameFont.cpp" />
-    <ClCompile Include="..\..\Source\LaserManager.cpp" />
     <ClCompile Include="..\..\Source\main.cpp" />
     <ClCompile Include="..\..\Source\MainMenu.cpp" />
     <ClCompile Include="..\..\Source\Player.cpp" />
@@ -111,7 +110,6 @@
     <ClInclude Include="..\..\Source\GameActor.h" />
     <ClInclude Include="..\..\Source\GameData.h" />
     <ClInclude Include="..\..\Source\GameFont.h" />
-    <ClInclude Include="..\..\Source\LaserManager.h" />
     <ClInclude Include="..\..\Source\MainMenu.h" />
     <ClInclude Include="..\..\Source\Player.h" />
     <ClInclude Include="..\..\Source\Laser.h" />

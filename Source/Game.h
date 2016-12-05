@@ -10,7 +10,6 @@ class MainMenu;
 class Player;
 class StandardAlien;
 class AlienManager;
-class LaserManager;
 
 /**
 *  Invaders Game. An OpenGL Game based on ASGE.
@@ -56,6 +55,5 @@ private:
 	std::unique_ptr<Player> player_one = nullptr;
 	std::unique_ptr<GameData> game_data = nullptr;
 	std::unique_ptr<AlienManager> alien_manager = nullptr;
-	std::unique_ptr<LaserManager> laser_manager = nullptr;
 };
 

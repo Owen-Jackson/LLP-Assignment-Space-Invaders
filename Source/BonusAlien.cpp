@@ -18,3 +18,8 @@ bool BonusAlien::checkCollisions()
 {
 	return false;
 }
+
+void BonusAlien::tick()
+{
+
+}

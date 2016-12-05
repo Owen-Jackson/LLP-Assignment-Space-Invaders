@@ -9,6 +9,8 @@ public:
 
 	int getScoreToAdd();
 	void setScoreToAdd(int score);
+
+	virtual void tick() = 0;
 	virtual void move() = 0;
 	virtual bool checkCollisions() = 0;
 

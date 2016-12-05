@@ -16,6 +16,7 @@ public:
 	int checkEdgeCollisions();
 	void tick();
 	void render();
+	void setBottomRowAliens();
 
 	//Add aliens to vector
 	void addAlien(std::unique_ptr<StandardAlien>&&);

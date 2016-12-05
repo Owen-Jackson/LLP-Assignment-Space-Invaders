@@ -1,11 +1,10 @@
 #include "Player.h"
-#include <memory>
-#include <vector>
 
 Player::Player(GameData* _GD) : GameActor::GameActor(_GD)
 {
 	game_data = _GD;
 	move_speed = 2;
+	laser = std::make_unique<Laser>(true, _GD);
 }
 
 void Player::move()
@@ -32,6 +31,7 @@ void Player::attack()
 {
 	if (game_data->player_can_shoot)
 	{
+		laser->spawn(actor_sprite->position[0] + (actor_sprite->size[0] * actor_sprite->scale) / 2, actor_sprite->position[1]);
 		game_data->player_can_shoot = false;
 	}
 }
@@ -47,5 +47,13 @@ bool Player::checkCollisions()
 		return true;
 	}
 	return false;
+}
 
+void Player::tick()
+{
+	if (alive)
+	{
+		actor_sprite->render(game_data->renderer);
+		laser->tick();
+	}
 }

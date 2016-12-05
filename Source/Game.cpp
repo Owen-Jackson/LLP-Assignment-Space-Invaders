@@ -13,6 +13,8 @@
 
 #include <vector>
 #include <memory>
+#include <string>
+#include <time.h>
 
 #include <Engine/Input.h>
 #include <Engine/Keys.h>
@@ -23,7 +25,7 @@
 */
 InvadersGame::InvadersGame()
 {
-
+	srand(time(NULL));
 }
 
 
@@ -77,7 +79,6 @@ bool InvadersGame::init()
 
 	//Initialise managers
 	alien_manager = std::make_unique<AlienManager>(game_data.get());
-	laser_manager = std::make_unique<LaserManager>(game_data.get());
 
 	// load space invader sprite
 	sprite = renderer->createSprite();
@@ -210,13 +211,13 @@ void InvadersGame::updatePlaying()
 	player_one->getSprite()->render(renderer);
 	
 	game_data->frame_count++;
+	alien_manager->tick();
 	if (game_data->frame_count == game_data->max_count)
 	{
-		alien_manager->tick();
 		game_data->frame_count = 0;
 	}
 	alien_manager->render();
-	laser_manager->tick();
+	player_one->tick();
 	endFrame();
 }
 
@@ -312,7 +313,6 @@ void InvadersGame::processGameActions()
 	}
 	case (GameAction::SHOOT) :
 	{
-		laser_manager->addLaser(std::make_unique<Laser>(true, player_one->getSprite()->position[0] + (player_one->getSprite()->size[0] / 4), player_one->getSprite()->position[1], game_data.get()));
 		if (game_data->player_can_shoot)
 		{
 			player_one->attack();
@@ -347,20 +347,5 @@ void InvadersGame::processStates(int key, int action)
 			}
 		}
 		break;
-		/*
-	case GameData::GameState::PLAYING:
-		switch (game_action)
-		{
-		case GameAction::LEFT:
-			player_one->setMoveState(Player::Movement::LEFT);
-			break;
-		case GameAction::RIGHT:
-			player_one->setMoveState(Player::Movement::RIGHT);
-			break;
-		case GameAction::NONE:
-			player_one->setMoveState(Player::Movement::NONE);
-			break;
-		}
-		*/
 	}
 }

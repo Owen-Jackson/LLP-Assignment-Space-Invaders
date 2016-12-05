@@ -6,6 +6,8 @@ StandardAlien::StandardAlien(GameData* _GD) : Alien::Alien(_GD)
 	game_data = _GD;
 	move_state = RIGHT;
 	move_speed = 10;
+	laser = std::make_unique<Laser>(false, _GD);
+	laser->setIsAlive(false);
 }
 
 void StandardAlien::move()
@@ -80,8 +82,18 @@ void StandardAlien::changeDirection()
 
 void StandardAlien::attack()
 {
-	if (canAttack)
+	laser->spawn(actor_sprite->position[0] + (actor_sprite->size[0] * actor_sprite->scale)/2, actor_sprite->position[1] + actor_sprite->size[1] * actor_sprite->scale);
+}
+
+void StandardAlien::tick()
+{
+	if (alive)
 	{
-		//std::unique_ptr<Laser> laser = std::make_unique<Laser>();
+		if (game_data->frame_count == game_data->max_count)
+		{
+			move();
+		}
+		actor_sprite->render(game_data->renderer);
+		laser->tick();
 	}
 }

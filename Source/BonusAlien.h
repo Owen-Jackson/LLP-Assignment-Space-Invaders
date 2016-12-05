@@ -9,4 +9,5 @@ public:
 
 	void move() override;
 	bool checkCollisions() override;
+	void tick() override;
 };

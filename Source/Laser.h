@@ -12,16 +12,17 @@ namespace ASGE
 class Laser : public GameActor
 {
 public:
-	Laser(bool player_laser, int pos_x, int pos_y, GameData* _GD);
+	Laser(bool player_laser, GameData* _GD);
 	~Laser() = default;
 
-	void init(int spawn_x, int spawn_y);
+	void init();
 	void move();
 	void tick();
 	bool checkCollisions();
 	void render();
+	void spawn(int spawn_x, int spawn_y);
 
 private:
-	bool is_alive = true;
+	bool is_alive = false;
 	bool is_player_laser;
 };
