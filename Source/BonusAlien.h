@@ -8,6 +8,6 @@ public:
 	~BonusAlien() = default;
 
 	void move() override;
-	bool checkCollisions() override;
+	bool checkCollisions();
 	void tick() override;
 };

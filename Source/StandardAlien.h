@@ -8,21 +8,15 @@ public:
 	StandardAlien(GameData* _GD);
 	~StandardAlien() = default;
 
-	void setBottomOfColumn(bool setting) { bottom_of_column = setting; }
-	bool getBottomOfColumn() { return bottom_of_column; }
-	void setColumnPosition(int pos) { column_pos = pos; }
-	int getColumnPosition() { return column_pos; }
-
-
 	void tick() override;
 	void move() override;
-	bool checkCollisions() override;
-	bool hitScreenEdge();
-	void changeDirection();
-	void attack();
+	bool hitScreenEdge();	//check if alien has hit the edge of the game screen
+	void changeDirection();	//change direction when at edge of game screen
+	void attack();	//shoot towards the player
+
+	//Accessors
+	Laser* getLaser();
 
 private:
 	std::unique_ptr<Laser> laser;
-	bool bottom_of_column = false;
-	int column_pos;
 };

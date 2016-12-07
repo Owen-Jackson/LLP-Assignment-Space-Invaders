@@ -1,6 +1,6 @@
 #pragma once
 #include <Engine/Sprite.h>
-#include"GameData.h"
+#include "GameData.h"
 #include "GameActor.h"
 
 namespace ASGE
@@ -16,13 +16,13 @@ public:
 	~Laser() = default;
 
 	void init();
-	void move();
-	void tick();
+	void move() override;
+	void tick() override;
 	bool checkCollisions();
 	void render();
 	void spawn(int spawn_x, int spawn_y);
 
 private:
-	bool is_alive = false;
-	bool is_player_laser;
+	bool is_alive = false;	//toggled to determine whether to render
+	bool is_player_laser;	//determines move_speed and travel direction
 };

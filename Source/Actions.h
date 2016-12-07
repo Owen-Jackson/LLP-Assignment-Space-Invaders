@@ -22,7 +22,7 @@ enum class GameAction
 	DOWN,		   /**< used to navigate down in the menu */
 	SHOOT,		   /**< signals the intention to shoot */
 	SELECT,		   /**< used when choosing options from the menus */
-	EXIT           /**< signals the intention to exit the game */
+	PAUSE           /**< signals the intention to pause or exit the game */
 };
 
 extern std::atomic<GameAction> game_action;

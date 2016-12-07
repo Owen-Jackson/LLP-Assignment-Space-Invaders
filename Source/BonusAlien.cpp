@@ -1,12 +1,12 @@
 #include "BonusAlien.h"
-#include "GameActor.h"
 
+//IMPLEMENTATION INCOMPLETE
 BonusAlien::BonusAlien(GameData* _GD) : Alien::Alien(_GD)
 {
 	game_data = _GD;
 	setScoreToAdd(300);
 	move_speed = 3;
-	canAttack = false;
+	type = ALIEN;
 }
 
 void BonusAlien::move()

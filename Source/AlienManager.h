@@ -16,7 +16,9 @@ public:
 	int checkEdgeCollisions();
 	void tick();
 	void render();
-	void setBottomRowAliens();
+	void checkObjectCollisions(GameActor* obj, GameActor::ActorType obj_type);
+	void checkLaserCollisions(GameActor* obj, GameActor::ActorType obj_type);
+	void reset();
 
 	//Add aliens to vector
 	void addAlien(std::unique_ptr<StandardAlien>&&);
@@ -24,4 +26,5 @@ public:
 private:
 	std::vector<std::unique_ptr<StandardAlien>> aliens;
 	GameData* game_data = nullptr;
+	bool moving_down = false;
 };

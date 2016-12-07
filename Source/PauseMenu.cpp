@@ -1,13 +1,14 @@
-#include "MainMenu.h"
+#include "PauseMenu.h"
 #include "Actions.h"
+#include <Engine/Sprite.h>
 
-MainMenu::MainMenu(GameData* _GD)
+PauseMenu::PauseMenu(GameData* _GD)
 {
 	game_data = _GD;
 	init();
 }
 
-void MainMenu::init()
+void PauseMenu::init()
 {
 	selection_arrow = game_data->renderer->createSprite();
 	selection_arrow->position[0] = 430;
@@ -20,22 +21,27 @@ void MainMenu::init()
 	selection_arrow->render(game_data->renderer);
 }
 
-void MainMenu::processMenuStates(GameAction action)
+void PauseMenu::changeSelection(int position_multiplier)
+{
+	selection_arrow->position[1] += 50 * position_multiplier;
+}
+
+void PauseMenu::processMenuStates(GameAction action)
 {
 	if (action == GameAction::UP)
 	{
 		switch (menu_state)
 		{
-		case MenuState::PLAY:
+		case MenuState::RESUME:
 			menu_state = MenuState::QUIT;
 			changeSelection(2);	//loop to bottom
 			break;
-		case MenuState::HIGHSCORES:
-			menu_state = MenuState::PLAY;
+		case MenuState::MAIN_MENU:
+			menu_state = MenuState::RESUME;
 			changeSelection(-1);
 			break;
 		case MenuState::QUIT:
-			menu_state = MenuState::HIGHSCORES;
+			menu_state = MenuState::MAIN_MENU;
 			changeSelection(-1);
 			break;
 		}
@@ -44,16 +50,16 @@ void MainMenu::processMenuStates(GameAction action)
 	{
 		switch (menu_state)
 		{
-		case MenuState::PLAY:
-			menu_state = MenuState::HIGHSCORES;
+		case MenuState::RESUME:
+			menu_state = MenuState::MAIN_MENU;
 			changeSelection(1);
 			break;
-		case MenuState::HIGHSCORES:
+		case MenuState::MAIN_MENU:
 			menu_state = MenuState::QUIT;
 			changeSelection(1);
 			break;
 		case MenuState::QUIT:
-			menu_state = MenuState::PLAY;
+			menu_state = MenuState::RESUME;
 			changeSelection(-2);	//loop to top
 			break;
 		}
@@ -61,12 +67,12 @@ void MainMenu::processMenuStates(GameAction action)
 	game_action = GameAction::NONE;
 }
 
-MainMenu::MenuState MainMenu::getMenuState()
+PauseMenu::MenuState PauseMenu::getMenuState()
 {
 	return menu_state;
 }
 
-void MainMenu::setMenuState(MainMenu::MenuState new_state)
+void PauseMenu::setMenuState(PauseMenu::MenuState new_state)
 {
 	menu_state = new_state;
 }

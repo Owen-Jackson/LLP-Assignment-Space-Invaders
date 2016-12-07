@@ -1,7 +1,5 @@
 #include "AlienManager.h"
-#include <Engine/Colours.h>
 #include <Engine/Renderer.h>
-#include <Engine/Sprite.h>
 
 AlienManager::AlienManager(GameData* _GD)
 {
@@ -9,6 +7,7 @@ AlienManager::AlienManager(GameData* _GD)
 	initManager();
 }
 
+//initialise aliens and add them to the vector on startup
 void AlienManager::initManager()
 {
 	aliens.reserve(55);
@@ -17,10 +16,9 @@ void AlienManager::initManager()
 	{
 		aliens.push_back(std::move(std::make_unique<StandardAlien>(game_data)));
 		aliens[i]->loadSprite(game_data->renderer);
-		aliens[i]->getSprite()->position[0] = column_count * 50 + 300;
+		aliens[i]->getSprite()->position[0] = column_count * 50 + 350;
 		aliens[i]->getSprite()->position[1] = row_count * 50 + 100;
-		aliens[i]->getSprite()->scale = 0.3;
-		aliens[i]->setColumnPosition(column_count);
+		aliens[i]->getSprite()->scale = 0.35;
 		game_data->number_of_alive_aliens++;
 		if (i > 32)
 		{
@@ -28,10 +26,7 @@ void AlienManager::initManager()
 			{
 				game_data->renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 			}
-			if (i > 43)
-			{
-				aliens[i]->setBottomOfColumn(true);
-			}
+			aliens[i]->setScoreToAdd(10);
 		}
 		else if (i > 10)
 		{
@@ -39,6 +34,7 @@ void AlienManager::initManager()
 			{
 				game_data->renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 			}
+			aliens[i]->setScoreToAdd(20);
 		}
 		else
 		{
@@ -46,6 +42,7 @@ void AlienManager::initManager()
 			{
 				game_data->renderer->renderText("The sprite didn't load", 400, 400, ASGE::COLOURS::WHITE);
 			}
+			aliens[i]->setScoreToAdd(30);
 		}
 		column_count++;
 		if (column_count % 11 == 0)
@@ -76,20 +73,7 @@ int AlienManager::checkEdgeCollisions()
 
 void AlienManager::tick()
 {
-	if (checkEdgeCollisions() > 0)
-	{
-		for (const auto& alien : aliens)
-		{
-			if (alien->getMoveState() != GameActor::Movement::DOWN)
-			{
-				alien->setMoveState(GameActor::Movement::DOWN);
-			}
-			else
-			{
-				alien->changeDirection();
-			}
-		}
-	}
+	//Make sure the aliens can shoot before checking if they are alive to
 	if (game_data->aliens_can_shoot)
 	{
 		bool found_alien = false;
@@ -99,7 +83,7 @@ void AlienManager::tick()
 			while (found_alien == false)
 			{
 				int r2 = rand() % 55;
-				if (aliens[r2]->getBottomOfColumn())
+				if (aliens[r2]->getIsAlive())
 				{
 					aliens[r2].get()->attack();
 					found_alien = true;
@@ -108,40 +92,123 @@ void AlienManager::tick()
 			game_data->aliens_can_shoot = false;
 		}
 	}
+
+	//Check if an alien has hit the edge of the screen
+	if (checkEdgeCollisions() > 0)
+	{
+		if (moving_down == false)
+		{
+			for (const auto& alien : aliens)
+			{
+				if (alien->getIsAlive())
+				{
+					alien->setMoveState(GameActor::Movement::DOWN);
+				}
+			}
+			moving_down = true;
+		}
+		else
+		{
+			moving_down = false;
+		}
+	}
+
+	//Tick each alien in the vector
 	for (const auto& alien : aliens)
 	{
 		alien->tick();
 	}
-	//setBottomRowAliens();
 }
 
+//Only renders aliens that are still alive
 void AlienManager::render()
 {
 	for (const auto& alien : aliens)
 	{
-		alien->getSprite()->render(game_data->renderer);
+		if (alien->getIsAlive())
+		{
+			alien->getSprite()->render(game_data->renderer);
+		}
 	}
 }
 
-void AlienManager::setBottomRowAliens()
+//Checks if aliens are hit
+void AlienManager::checkObjectCollisions(GameActor* obj, GameActor::ActorType obj_type)
 {
-	int column_count = 0, row_count = 0;
-	for (int i = 0; i < aliens.size(); i++)
+	for (const auto& alien : aliens)
 	{
-		if (aliens[i]->getIsAlive())
+		//If bounding boxes of the sprites are touching
+		if (obj->getSprite()->position[0] + obj->getSprite()->size[0] * obj->getSprite()->scale >= alien->getSprite()->position[0]
+			&& obj->getSprite()->position[0] <= alien->getSprite()->position[0] + alien->getSprite()->size[0] * alien->getSprite()->scale
+			&& obj->getSprite()->position[1] + obj->getSprite()->size[1] * obj->getSprite()->scale >= alien->getSprite()->position[1]
+			&& obj->getSprite()->position[1] <= alien->getSprite()->position[1] + alien->getSprite()->size[1] * alien->getSprite()->scale)
 		{
-			if (i > 43 && aliens[i]->getIsAlive())
+			if (alien->getIsAlive())
 			{
-				aliens[i]->setBottomOfColumn(true);
+				//Kill the hit alien
+				if (obj_type == GameActor::ActorType::PLAYER_LASER && obj->getIsAlive())
+				{
+					obj->setIsAlive(false);
+					game_data->player_can_shoot = true;
+					game_data->player_score += alien->getScoreToAdd();
+					alien->setIsAlive(false);
+					game_data->number_of_alive_aliens--;
+					game_data->max_count -= 0.4;
+				}
+				//Kill the player - Game over
+				if (obj_type == GameActor::ActorType::PLAYER && obj->getIsAlive())
+				{
+					game_data->player_lives = 0;
+				}
 			}
-			else if (aliens[i + 11]->getIsAlive())
+		}
+	}
+}
+
+//Checks if player is hit by alien lasers
+void AlienManager::checkLaserCollisions(GameActor* obj, GameActor::ActorType obj_type)
+{
+	for (const auto& alien : aliens)
+	{
+		if (obj->getSprite()->position[0] + obj->getSprite()->size[0] * obj->getSprite()->scale >= alien->getLaser()->getSprite()->position[0]
+			&& obj->getSprite()->position[0] <= alien->getLaser()->getSprite()->position[0] + alien->getLaser()->getSprite()->size[0] * alien->getLaser()->getSprite()->scale
+			&& obj->getSprite()->position[1] + obj->getSprite()->size[1] * obj->getSprite()->scale >= alien->getLaser()->getSprite()->position[1]
+			&& obj->getSprite()->position[1] <= alien->getLaser()->getSprite()->position[1] + alien->getLaser()->getSprite()->size[1] * alien->getLaser()->getSprite()->scale)
+		{
+			if (obj->getIsAlive() && obj_type == GameActor::ActorType::PLAYER)
 			{
-				aliens[i]->setBottomOfColumn(true);
+				//Player loses life
+				if (alien->getLaser()->getIsAlive())
+				{
+					alien->getLaser()->setIsAlive(false);
+					obj->setIsAlive(false);
+					game_data->player_lives--;
+					obj->getSprite()->position[0] = WINDOW_WIDTH / 2;
+					game_data->aliens_can_shoot = true;
+				}
 			}
-			else
-			{
-				aliens[i]->setBottomOfColumn(false);
-			}
+		}
+	}
+}
+
+//Used when a wave is cleared or after game over
+void AlienManager::reset()
+{
+	game_data->number_of_alive_aliens = 0;
+	game_data->max_count = 40;
+	int row_count = 0, column_count = 0;
+	for (int i = 0; i < aliens.capacity(); i++)
+	{
+		aliens[i]->getSprite()->position[0] = column_count * 50 + 350;
+		aliens[i]->getSprite()->position[1] = row_count * 50 + 100;
+		aliens[i]->setIsAlive(true);
+		aliens[i]->setMoveState(GameActor::Movement::RIGHT);
+		game_data->number_of_alive_aliens++;
+		column_count++;
+		if (column_count % 11 == 0)
+		{
+			column_count = 0;
+			row_count++;
 		}
 	}
 }

@@ -5,6 +5,14 @@ Laser::Laser(bool player_laser, GameData* _GD) : GameActor::GameActor(_GD)
 {
 	game_data = _GD;
 	is_player_laser = player_laser;
+	if (is_player_laser)
+	{
+		type = PLAYER_LASER;
+	}
+	else
+	{
+		type = ALIEN_LASER;
+	}
 	init();
 }
 
@@ -12,18 +20,18 @@ void Laser::move()
 {
 	if (is_player_laser)
 	{
-		actor_sprite->position[1] -= 2;
+		actor_sprite->position[1] -= 15;
 	}
 	else
 	{
-		actor_sprite->position[1] += 2;
+		actor_sprite->position[1] += 6;
 	}
 }
 
 void Laser::init()
 {
 	actor_sprite = game_data->renderer->createSprite();
-	actor_sprite->scale = 0.2;
+	actor_sprite->scale = 0.4;
 	if (is_player_laser)
 	{
 		if (!actor_sprite->loadTexture("..\\..\\Resources\\Textures\\Player Laser.png"))
@@ -51,9 +59,10 @@ void Laser::tick()
 	}
 }
 
+//Check if laser has hit top or bottom of game screen
 bool Laser::checkCollisions()
 {
-	if (actor_sprite->position[1] == 0 || actor_sprite->position[1] + actor_sprite->size[1]* actor_sprite->scale >= WINDOW_HEIGHT)
+	if (actor_sprite->position[1] <= 0 || actor_sprite->position[1] + actor_sprite->size[1]* actor_sprite->scale >= WINDOW_HEIGHT)
 	{
 		alive = false;
 		if (is_player_laser)
@@ -66,10 +75,7 @@ bool Laser::checkCollisions()
 		}
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void Laser::render()

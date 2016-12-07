@@ -3,6 +3,7 @@
 Alien::Alien(GameData* _GD) : GameActor::GameActor(_GD)
 {
 	game_data = _GD;
+	type = ALIEN;
 }
 
 int Alien::getScoreToAdd()

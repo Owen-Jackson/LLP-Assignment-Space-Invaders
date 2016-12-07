@@ -12,9 +12,7 @@ public:
 
 	virtual void tick() = 0;
 	virtual void move() = 0;
-	virtual bool checkCollisions() = 0;
 
 protected:
-	int points_worth = 100;
-	bool canAttack = true;
+	int points_worth;
 };

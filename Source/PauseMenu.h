@@ -3,20 +3,21 @@
 
 enum class GameAction;
 
-class MainMenu : public Menu
+class PauseMenu : public Menu
 {
 public:
-	enum MenuState
+	enum MenuState 
 	{
-		PLAY,
-		HIGHSCORES,
+		RESUME,
+		MAIN_MENU,
 		QUIT
 	};
 
-	MainMenu(GameData* _GD);
-	~MainMenu() = default;
+	PauseMenu(GameData* _GD);
+	~PauseMenu() = default;
 
 	void init() override;
+	void changeSelection(int new_position) override;
 	void processMenuStates(GameAction action);
 
 	//Accessors
@@ -24,5 +25,5 @@ public:
 	void setMenuState(MenuState new_state);
 
 private:
-	MenuState menu_state = MenuState::PLAY;
+	MenuState menu_state = MenuState::RESUME;
 };

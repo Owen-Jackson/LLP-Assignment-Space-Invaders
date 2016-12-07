@@ -21,6 +21,11 @@ GameActor::Movement GameActor::getMoveState()
 	return move_state;
 }
 
+GameActor::ActorType GameActor::getActorType()
+{
+	return type;
+}
+
 GameActor::Movement GameActor::getPreviousMoveState()
 {
 	return previous_move_state;
@@ -44,4 +49,9 @@ void GameActor::setPreviousMoveState(Movement last_state)
 void GameActor::setIsAlive(bool setting)
 {
 	alive = setting;
+}
+
+void GameActor::setActorType(GameActor::ActorType new_type)
+{
+	type = new_type;
 }
