@@ -203,7 +203,7 @@ void InvadersGame::updateGameOver()
 	beginFrame();
 	renderer->renderText("GAME OVER", 475, 200, ASGE::COLOURS::RED);
 	renderer->renderText(score_string.c_str(), 475, 325, ASGE::COLOURS::YELLOW);
-	renderer->renderText("Press any key to return to main menu", 200, 475, ASGE::COLOURS::GREEN);
+	renderer->renderText("Press any key to return to main menu\nor Esc to quit", 200, 475, ASGE::COLOURS::GREEN);
 
 	endFrame();
 }
